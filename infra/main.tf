@@ -33,3 +33,18 @@ resource "google_service_account" "runtime" {
   account_id   = "secure-api-runtime"
   display_name = "Secure API Cloud Run runtime"
 }
+
+# IAC-002: intentionally insecure public bucket
+
+resource "google_storage_bucket" "iac_negative_test" {
+  name     = "${var.project_id}-iac-negative-test"
+  location = var.region
+
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "iac_negative_public" {
+  bucket = google_storage_bucket.iac_negative_test.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
+}
