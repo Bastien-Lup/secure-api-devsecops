@@ -1,42 +1,28 @@
-FROM python:3.12-slim-bookworm@sha256:0f5b26b9518d002b6173fd61daad821fa340635ebfec5bba471013f9ca114579 AS builder
-
-ENV VIRTUAL_ENV=/opt/venv
-ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
+FROM python:3.13-slim-trixie@sha256:16f75ad0fbc6c4883a8afd63b2d700c3cf68ccffc1aaeca5304ca0a3a908451f AS builder
 
 WORKDIR /build
 
-RUN python -m venv "${VIRTUAL_ENV}"
-
 COPY requirements.txt .
 
-RUN pip install \
+RUN python -m pip install \
     --no-cache-dir \
     --disable-pip-version-check \
+    --target=/opt/python \
     -r requirements.txt
 
 
-FROM python:3.12-slim-bookworm@sha256:0f5b26b9518d002b6173fd61daad821fa340635ebfec5bba471013f9ca114579 AS runtime
+FROM gcr.io/distroless/python3-debian13:nonroot@sha256:2da46b943456ad2544a03426474f593aacb6af587c64fa3229c7b16987bb30e2 AS runtime
 
-ENV VIRTUAL_ENV=/opt/venv
-ENV PATH="${VIRTUAL_ENV}/bin:${PATH}" \
+ENV PYTHONPATH=/opt/python \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-RUN groupadd --gid 10001 app \
-    && useradd \
-       --system \
-       --gid 10001 \
-       --uid 10001 \
-       --no-create-home \
-       --shell /usr/sbin/nologin \
-       app
+COPY --from=builder --chown=65532:65532 /opt/python /opt/python
+COPY --chown=65532:65532 app/ ./app/
 
-COPY --from=builder /opt/venv /opt/venv
-COPY --chown=10001:10001 app/ ./app/
-
-USER 10001:10001
+USER 65532:65532
 
 EXPOSE 8000
 
@@ -45,6 +31,8 @@ HEALTHCHECK \
     --timeout=3s \
     --start-period=5s \
     --retries=3 \
-    CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).read()"]
+    CMD ["/usr/bin/python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).read()"]
 
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["/usr/bin/python"]
+
+CMD ["-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
