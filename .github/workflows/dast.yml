@@ -67,9 +67,11 @@ jobs:
             --rm \
             --network host \
             --volume "$PWD/zap-reports:/zap/wrk:rw" \
+            --volume "$PWD/.zap/rules.tsv:/zap/rules.tsv:ro" \
             ghcr.io/zaproxy/zaproxy@sha256:781a2bdaea47324e7bab583e2263f21d257b0aee61ed51521a5be45f5f5081ef \
             zap-baseline.py \
             -t http://127.0.0.1:8000 \
+            -c /zap/rules.tsv \
             -J report.json \
             -w report.md \
             -r report.html
