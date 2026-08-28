@@ -38,6 +38,9 @@ jobs:
       - name: Terraform validate
         run: terraform -chdir=infra validate
 
+      - name: Terraform tests
+        run: terraform -chdir=infra test
+
   iac-scan:
     name: IaC scan
     runs-on: ubuntu-24.04
