@@ -9,6 +9,9 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
 
+    # DAST-003: intentional information disclosure
+    response.headers["X-Powered-By"] = "FastAPI"
+
     return response
 
 @app.get("/")
