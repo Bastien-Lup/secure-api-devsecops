@@ -2,14 +2,14 @@ FROM python:3.13-slim-trixie@sha256:16f75ad0fbc6c4883a8afd63b2d700c3cf68ccffc1aa
 
 WORKDIR /build
 
-COPY requirements.txt .
+COPY requirements.lock .
 
 RUN python -m pip install \
     --no-cache-dir \
     --disable-pip-version-check \
+    --require-hashes \
     --target=/opt/python \
-    -r requirements.txt
-
+    -r requirements.lock
 
 FROM gcr.io/distroless/python3-debian13:nonroot@sha256:2da46b943456ad2544a03426474f593aacb6af587c64fa3229c7b16987bb30e2 AS runtime
 
