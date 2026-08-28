@@ -1,0 +1,90 @@
+name: DAST
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dast-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zap-baseline:
+    name: ZAP Baseline
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build application image
+        run: |
+          docker build \
+            --pull=false \
+            --tag secure-api:dast \
+            .
+
+      - name: Start application
+        run: |
+          docker run \
+            --detach \
+            --name secure-api-dast \
+            --publish 8000:8000 \
+            secure-api:dast
+
+      - name: Wait for application
+        shell: bash
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent \
+              http://127.0.0.1:8000/health > /dev/null; then
+              echo "Application is healthy"
+              exit 0
+            fi
+
+            sleep 1
+          done
+
+          echo "Application failed to become healthy"
+          docker logs secure-api-dast
+          exit 1
+
+      - name: Prepare ZAP report directory
+        run: |
+          mkdir -p zap-reports
+          chmod 0777 zap-reports
+
+      - name: Run OWASP ZAP baseline
+        run: |
+          docker run \
+            --rm \
+            --network host \
+            --volume "$PWD/zap-reports:/zap/wrk:rw" \
+            ghcr.io/zaproxy/zaproxy@sha256:781a2bdaea47324e7bab583e2263f21d257b0aee61ed51521a5be45f5f5081ef \
+            zap-baseline.py \
+            -t http://127.0.0.1:8000 \
+            -I \
+            -J report.json \
+            -w report.md \
+            -r report.html
+
+      - name: Upload ZAP reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: zap-baseline-${{ github.sha }}
+          path: zap-reports/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Stop application
+        if: always()
+        run: |
+          docker rm --force secure-api-dast 2>/dev/null || true
