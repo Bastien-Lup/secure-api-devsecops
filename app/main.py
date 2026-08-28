@@ -15,9 +15,3 @@ def read_health():
     return {
         "status": "healthy"
     }
-
-@app.get("/calculate")
-def calculate(expression: str):
-    return {
-        "result": eval(expression)
-    }
