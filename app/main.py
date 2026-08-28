@@ -9,3 +9,9 @@ def read_root():
         "status": "ok",
         "service": "secure-api"
     }
+
+@app.get("/health")
+def read_health():
+    return {
+        "status": "healthy"
+    }
