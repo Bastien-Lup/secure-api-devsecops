@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "app/**"
+      - "Dockerfile"
+      - "requirements.in"
+      - "requirements.lock"
+      - ".github/workflows/publish.yml"
   workflow_dispatch:
 
 permissions:
@@ -60,7 +66,7 @@ jobs:
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
           create-storage-record: false
-    
+
       - name: Generate CycloneDX SBOM
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
