@@ -6,6 +6,26 @@
 [![DAST](https://github.com/bastien-ladra/secure-api-devsecops/actions/workflows/dast.yml/badge.svg)](https://github.com/bastien-ladra/secure-api-devsecops/actions/workflows/dast.yml)
 [![IaC](https://github.com/bastien-ladra/secure-api-devsecops/actions/workflows/iac.yml/badge.svg)](https://github.com/bastien-ladra/secure-api-devsecops/actions/workflows/iac.yml)
 
+**Portfolio :** [bastien-ladra.github.io/portfolio-bastien-ladra](https://bastien-ladra.github.io/portfolio-bastien-ladra/) · **Étude de cas FR :** [Secure API DevSecOps](https://bastien-ladra.github.io/portfolio-bastien-ladra/case-study-secure-api-fr.html) · **Case study EN :** [Secure API DevSecOps](https://bastien-ladra.github.io/portfolio-bastien-ladra/case-study-secure-api.html)
+
+## Résumé recruteur
+
+Ce dépôt est un projet de référence **DevSecOps / software supply chain / cloud security** construit autour d'une API FastAPI volontairement simple afin de rendre les contrôles de livraison faciles à inspecter.
+
+Il démontre concrètement :
+
+- **CI et sécurité du code** : tests Python, Gitleaks, Dependency Review et CodeQL ;
+- **sécurité conteneur** : build multi-stage, runtime distroless non-root et scan Trivy HIGH/CRITICAL ;
+- **preuves supply-chain** : SBOM CycloneDX, provenance de build et attestation SBOM ;
+- **DAST et IaC** : OWASP ZAP baseline, Terraform validate/test et scan de configuration Trivy ;
+- **cible cloud GCP** : Artifact Registry à tags immuables, Cloud Run avec identité dédiée et service non public par défaut.
+
+Le projet ne cherche pas à empiler des outils : il montre comment les contrôles s'enchaînent de la pull request jusqu'à l'artefact publiable, avec leurs **preuves et limites explicites**.
+
+> Pour une lecture rapide orientée recrutement, l'étude de cas française ci-dessus synthétise l'architecture, les résultats et les limites. La suite de ce README conserve le niveau de détail technique nécessaire à une revue d'ingénierie.
+
+---
+
 A compact reference project for building and validating a secure software delivery path around a FastAPI service.
 
 The goal is not to demonstrate one scanner. It is to show how security controls compose across **source code, dependencies, containers, infrastructure and artifact publication**.
