@@ -1,0 +1,11 @@
+# Default ownership for this single-maintainer security engineering project.
+* @bastien-ladra
+
+# Security-sensitive delivery and infrastructure controls.
+/.github/workflows/ @bastien-ladra
+/Dockerfile @bastien-ladra
+/infra/ @bastien-ladra
+/requirements*.in @bastien-ladra
+/requirements*.lock @bastien-ladra
+/SECURITY.md @bastien-ladra
+/docs/threat-model.md @bastien-ladra
